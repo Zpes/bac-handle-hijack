@@ -4,11 +4,11 @@ typedef NTSTATUS(NTAPI* NtQuerySystemInformation_t)(ULONG, PVOID, ULONG, PULONG)
 
 HANDLE utility::find_hijackable_handle(int pid)
 {
-	auto NtQuerySystemInformation = reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQuerySystemInformation"));
+	NtQuerySystemInformation_t NtQuerySystemInformation = reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtQuerySystemInformation"));
 	NTSTATUS status;
 	ULONG handleInfoSize = 0x10000;
-
-	auto handleInfo = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(malloc(handleInfoSize));
+	
+	PSYSTEM_HANDLE_INFORMATION handleInfo = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(malloc(handleInfoSize));
 
 	while ((status = NtQuerySystemInformation(16, handleInfo, handleInfoSize, nullptr)) == STATUS_INFO_LENGTH_MISMATCH)
 		handleInfo = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(realloc(handleInfo, handleInfoSize *= 2));
@@ -16,17 +16,16 @@ HANDLE utility::find_hijackable_handle(int pid)
     if (!(status == STATUS_SUCCESS))
         return nullptr;
 
-	for (auto i = 0; i < handleInfo->HandleCount; i++)
+	for (int i = 0; i < handleInfo->HandleCount; i++)
 	{
-		auto handle = handleInfo->Handles[i];
+		SYSTEM_HANDLE handle = handleInfo->Handles[i];
 
-		const auto process = reinterpret_cast<HANDLE>(handle.Handle);
+		HANDLE process = reinterpret_cast<HANDLE>(handle.Handle);
 		if (handle.ProcessId == GetCurrentProcessId() && GetProcessId(process) == pid)
 			return process;
 	}
 
 	free(handleInfo);
-
 	return nullptr;
 }
 
