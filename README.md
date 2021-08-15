@@ -3,6 +3,7 @@
 ## What is this?
 Injecting into the badlion client launcher and hijacking a full control handle to the game
 
+## PROBABLY DETECTED DIDNT TEST
 ## PLEASE NOTE THE DLL THAT GETS INJECTED INTO THE LAUNCHER AND THE ONE THAT GETS INJECTED INTO THE GAME ARE HARDCODED PATHS. IF YOU DO NOT CHANGE THESE PATHS IT WIL NOT WORK.
 
 ## Functionality
